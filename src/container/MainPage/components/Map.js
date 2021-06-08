@@ -1,59 +1,107 @@
 import React, {useState, useEffect} from 'react';
-import {connect} from 'react-redux'
-import {Map, InfoWindow, GoogleApiWrapper} from 'google-maps-react'
+import {Map, InfoWindow, GoogleApiWrapper, Marker} from 'google-maps-react'
+
+const style = {
+    width: '100%',
+    height: '100vh'
+};
 
 const MapDirection = (props) => {
     const { places, travelMode } = props
-    const [directions, setDirection] = useState(null)
+    const [selectedPlace, setPlaces] = useState(null)
+    const [activeMarker, setMarker] = useState(null)
+    const [bounds, setBounds] = useState(null)
     const [error, setError] = useState(null)
 
     useEffect(() => {
+        var bounds1 = new window.google.maps.LatLngBounds();
+            for (var i = 0; i < places.length; i++) {
+                bounds1.extend(places[i]);
+            }
+            setBounds(bounds1)
+    }, [])
+
+
+    useEffect(() => {
         const waypoints = places.map(p => ({
-            location: { lat: p.latitude, lng: p.longitude },
+            location: { lat: p.lat, lng: p.lng },
             stopover: true
         }))
 
-        console.log('here', waypoints);
-        let point = waypoints.shift()
-        let point1 = waypoints.pop()
-        if (point !== undefined && point1 !== undefined) {
-            const origin = point.location;
-            const destination = point1.location;
+        
+
+        // let point = waypoints.shift()
+        // console.log('shift', point);
+        // let point1 = waypoints.pop()
+        // console.log('pop', point1);
+        // if (point !== undefined && point1 !== undefined) {
+            const origin = waypoints[0].location;
+            const destination = waypoints[2].location;
             const directionsService = new window.google.maps.DirectionsService();
             const directionsDisplay = new window.google.maps.DirectionsRenderer();
-            console.log('here');
+
+            directionsDisplay.setMap(null);
 
             directionsService.route(
                 {
                     origin: origin,
                     destination: destination,
                     // travelMode: travelMode,
-                    travelMode: 'DRIVING',
+                    // travelMode: 'DRIVING',
+                    travelMode: window.google.maps.DirectionsTravelMode.WALKING,
+                    // travelMode: 'WALKING',
                     waypoints: waypoints
                 },
                 (result, status) => {
                     if (status === window.google.maps.DirectionsStatus.OK) {
                         // setDirection(result)
+                        console.log('result', result);
                         directionsDisplay.setDirections(result)
                     } else {
                         setError(result)
                     }
                 }
             );
-        }
+        // }
     }, [])
 
+    const onMarkerClick = (props, marker, e) => {
+        setPlaces(props)
+        setMarker(marker)
+    }
+
     return ( 
-        <div>
+        <div className="col-md-12">
+            {error && <p>{error.status}</p>}
             <Map
                 google={window.google}
-                zoom={15}
-                initialCenter={{ lat: -34, lng: 150 }}
-            />
+                // zoom={12}
+                bounds={bounds}
+                style={style}
+                initialCenter={{ lat: places[0].lat, lng: places[0].lng }}
+            >
+                {places.map((p, index) => (
+                    <Marker
+                        key={index}
+                        name={'Dolores park'+index}
+                        onClick={onMarkerClick}
+                        position={{lat: p.lat, lng: p.lng}} />
+                        
+                    ))}
+                    <InfoWindow
+                        marker={activeMarker}
+                        visible={true}
+                        >
+                            <div>
+                            <h1>{selectedPlace && selectedPlace.name}</h1>
+                            </div>
+                        </InfoWindow>
+            </Map>
         </div>
      );
 }
 
 export default GoogleApiWrapper({
     apiKey: 'AIzaSyDdPAhHXaBBh2V5D2kQ3Vy7YYrDrT7UW3I'
+    // apiKey: 'AIzaSyAkhD0FzDxe7D6b4TNuAL6mOkDWZ9Jt7Vk'
   })(MapDirection)
