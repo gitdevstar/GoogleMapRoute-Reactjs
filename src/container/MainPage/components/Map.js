@@ -106,7 +106,4 @@ const MapDirection = (props) => {
      );
 }
 
-export default GoogleApiWrapper({
-    apiKey: 'AIzaSyDdPAhHXaBBh2V5D2kQ3Vy7YYrDrT7UW3I'
-    // apiKey: 'AIzaSyAkhD0FzDxe7D6b4TNuAL6mOkDWZ9Jt7Vk'
-  })(MapDirection)
+export default MapDirection

@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import { GoogleApiWrapper } from 'google-maps-react'
 import {Button} from '@material-ui/core'
 import styled from 'styled-components'
 
@@ -49,4 +50,7 @@ const MainPage = () => {
     );
 };
 
-export default MainPage;
+export default GoogleApiWrapper({
+    apiKey: process.env.REACT_APP_GOOGLEMAP_API_KEY
+    // apiKey: "AIzaSyDdPAhHXaBBh2V5D2kQ3Vy7YYrDrT7UW3I"
+  })(MainPage)

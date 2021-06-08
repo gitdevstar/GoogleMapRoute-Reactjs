@@ -104,7 +104,7 @@ const MaterialAutocompletePlaces = (props) => {
             value={format? null: value}
             onChange={(event, newValue) => {
                 // console.log('auto change',newValue);
-                Geocode.setApiKey("AIzaSyDdPAhHXaBBh2V5D2kQ3Vy7YYrDrT7UW3I");
+                Geocode.setApiKey(`${process.env.REACT_APP_GOOGLEMAP_API_KEY}`);
                 Geocode.fromAddress(newValue.description).then(
                     (response) => {
                       const { lat, lng } = response.results[0].geometry.location;
@@ -154,7 +154,4 @@ const MaterialAutocompletePlaces = (props) => {
     );
 }
 
-export default GoogleApiWrapper({
-    apiKey: 'AIzaSyDdPAhHXaBBh2V5D2kQ3Vy7YYrDrT7UW3I'
-    // apiKey: 'AIzaSyAkhD0FzDxe7D6b4TNuAL6mOkDWZ9Jt7Vk'
-  })(MaterialAutocompletePlaces)
+export default MaterialAutocompletePlaces
