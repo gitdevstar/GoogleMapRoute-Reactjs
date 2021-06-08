@@ -19,10 +19,8 @@ const MainPage = () => {
     const [kind, setKind] = useState(0)
 
     const addLocation = (location) => {
-        console.log("location", location);
         setPlaces([...places, location]);//{lat: 20, lng: 23}
         setFormat(false)
-        console.log(places);
     }
 
     const changePath = () => {

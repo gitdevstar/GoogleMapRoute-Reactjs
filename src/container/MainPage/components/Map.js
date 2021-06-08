@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Map, InfoWindow, GoogleApiWrapper, Marker} from 'google-maps-react'
+import {Map, InfoWindow, GoogleApiWrapper, Marker, Polyline} from 'google-maps-react'
 
 const style = {
     width: '100%',
@@ -8,26 +8,25 @@ const style = {
 
 const MapDirection = (props) => {
     const { places, travelMode } = props
+    const [path, setPath] = useState([])
     const [selectedPlace, setPlaces] = useState(null)
     const [activeMarker, setMarker] = useState(null)
     const [bounds, setBounds] = useState(null)
     const [error, setError] = useState(null)
 
-    
     const initPlace = places.length > 0 ? { lat: places[0].lat, lng: places[0].lng }: { lat: -134, lng: -134 }
-    console.log('initplace', initPlace);
+
     useEffect(() => {
         var bounds1 = new window.google.maps.LatLngBounds();
         for (var i = 0; i < places.length; i++) {
             bounds1.extend(places[i]);
         }
         setBounds(bounds1)
-        console.log('bounds', bounds);
     }, [places])
 
 
     useEffect(() => {
-        if(places.length > 0) {
+        if(places.length > 1) {
 
             const waypoints = places.map(p => ({
                 location: { lat: p.lat, lng: p.lng },
@@ -35,13 +34,10 @@ const MapDirection = (props) => {
             }))
     
             
-            // let point = waypoints.shift()
-            // console.log('shift', point);
-            // let point1 = waypoints.pop()
-            // console.log('pop', point1);
-            // if (point !== undefined && point1 !== undefined) {
-                const origin = waypoints[0].location;
-                const destination = waypoints[2].location;
+            let first = waypoints.shift()
+            let last = waypoints.pop()
+                const origin = first.location;
+                const destination = last.location;
                 const directionsService = new window.google.maps.DirectionsService();
                 const directionsDisplay = new window.google.maps.DirectionsRenderer();
     
@@ -53,7 +49,8 @@ const MapDirection = (props) => {
                         destination: destination,
                         // travelMode: travelMode,
                         // travelMode: 'DRIVING',
-                        travelMode: window.google.maps.DirectionsTravelMode.WALKING,
+                        // travelMode: window.google.maps.DirectionsTravelMode.WALKING,
+                        travelMode: window.google.maps.DirectionsTravelMode.DRIVING,
                         // travelMode: 'WALKING',
                         waypoints: waypoints
                     },
@@ -61,6 +58,13 @@ const MapDirection = (props) => {
                         if (status === window.google.maps.DirectionsStatus.OK) {
                             // setDirection(result)
                             console.log('result', result);
+                            var tempArray = []
+                            for(var i = 0; i < result.routes[0].overview_path.length; i ++) {
+                                var temp = {lat: result.routes[0].overview_path[i].lat(), lng: result.routes[0].overview_path[i].lng()}
+                                tempArray.push(temp)
+                            }
+                            setPath(tempArray)
+                            console.log('overview', result.routes[0].overview_path[0].lat());
                             directionsDisplay.setDirections(result)
                         } else {
                             setError(result)
@@ -68,8 +72,7 @@ const MapDirection = (props) => {
                     }
                 );
         }
-        // }
-    }, [])
+    }, [places])
 
     const onMarkerClick = (props, marker, e) => {
         setPlaces(props)
@@ -101,6 +104,13 @@ const MapDirection = (props) => {
                             <h1>{selectedPlace && selectedPlace.name}</h1>
                         </div>
                     </InfoWindow>
+                    {path.length > 0 && 
+                        <Polyline
+                            path={path}
+                            strokeColor="#0000FF"
+                            strokeOpacity={0.8}
+                            strokeWeight={2} />
+                    }
             </Map>
         </div>
      );
