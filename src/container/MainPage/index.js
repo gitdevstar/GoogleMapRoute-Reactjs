@@ -19,7 +19,12 @@ const MainPage = () => {
     const [kind, setKind] = useState(0)
 
     const addLocation = (location) => {
-        setPlaces([...places, location]);//{lat: 20, lng: 23}
+        if(format) {
+            setPlaces([...places, location]);//{lat: 20, lng: 23}
+        } else {
+            places.pop()
+            setPlaces([...places, location]);
+        }
         setFormat(false)
     }
 
